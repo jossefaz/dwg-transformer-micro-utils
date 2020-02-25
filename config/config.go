@@ -5,7 +5,7 @@ import (
 	"github.com/yossefazoulay/go_utils/utils"
 )
 
-func GetConfig(env string, configuration *interface{}) {
+func GetConfig(env string, configuration interface{}) {
 	var configEnv = make(map[string]string)
 	configEnv["dev"] = "./config/config.dev.json"
 	configEnv["prod"] = "./config/config.prod.json"
