@@ -9,7 +9,7 @@ func GetConfig(env string, configuration interface{}) {
 	var configEnv = make(map[string]string)
 	configEnv["dev"] = "./config/config.dev.json"
 	configEnv["prod"] = "./config/config.prod.json"
-	err := gonfig.GetConf(configEnv[env], &configuration)
+	err := gonfig.GetConf(configEnv[env], configuration)
 	utils.HandleError(err, "Cannot load/read config file")
 }
 
