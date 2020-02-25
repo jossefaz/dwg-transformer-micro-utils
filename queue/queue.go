@@ -7,18 +7,18 @@ import (
 	"github.com/yossefazoulay/go_utils/utils"
 )
 
-type rabbitmq struct {
+type Rabbitmq struct {
 	Conn  *amqp.Connection
 	ChanL *amqp.Channel
 	Queue amqp.Queue
 }
 
 
-func NewRabbit(connString string, queueName string) (instance rabbitmq) {
+func NewRabbit(connString string, queueName string) (instance Rabbitmq) {
 	conn := dial(connString)
 	amqpChannel := getChannel(conn)
 	queue := connectToQueue(amqpChannel, queueName)
-	return rabbitmq{
+	return Rabbitmq{
 		Conn:  conn,
 		ChanL: amqpChannel,
 		Queue: queue,
@@ -52,7 +52,7 @@ func connectToQueue(c *amqp.Channel, queueName string) amqp.Queue {
 	return q
 }
 
-func (rmq rabbitmq) SendMessage(body []byte) {
+func (rmq Rabbitmq) SendMessage(body []byte) {
 	err := rmq.ChanL.Publish("", rmq.Queue.Name, false, false, amqp.Publishing{
 		DeliveryMode: amqp.Persistent,
 		ContentType:  "text/plain",
@@ -63,7 +63,7 @@ func (rmq rabbitmq) SendMessage(body []byte) {
 	}
 	fmt.Println(string(body))
 }
-func (rmq rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, rmq rabbitmq)) {
+func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, rmq Rabbitmq)) {
 	err := rmq.ChanL.Qos(1, 0, false)
 	utils.HandleError(err, "Could not configure QoS")
 	messageChannel, err := rmq.ChanL.Consume(
