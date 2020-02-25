@@ -6,7 +6,7 @@ import (
 	"github.com/streadway/amqp"
 	"os"
 	"os/exec"
-	"github.com/yossefazoulay/dwg_transformer/tree/master/lib/utils"
+	"github.com/yossefazoulay/go_utils/utils"
 )
 
 type rabbitmq struct {
