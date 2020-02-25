@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/tkanos/gonfig"
+	"github.com/yossefazoulay/go_utils/utils"
 )
 
 type Configuration struct {
@@ -22,7 +23,7 @@ func GetConfig(env string)  Configuration {
 	configEnv["prod"] = "./config/files/config.prod.json"
 	configuration := Configuration{}
 	err := gonfig.GetConf(configEnv[env], &configuration)
-	HandleError(err, "Cannot load/read config file")
+	utils.HandleError(err, "Cannot load/read config file")
 	return configuration
 }
 
