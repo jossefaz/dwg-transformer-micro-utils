@@ -1,11 +1,9 @@
 package queue
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/streadway/amqp"
 	"os"
-	"os/exec"
 	"github.com/yossefazoulay/go_utils/utils"
 )
 
@@ -65,9 +63,7 @@ func (rmq rabbitmq) SendMessage(body []byte) {
 	}
 	fmt.Println(string(body))
 }
-
-func (rmq rabbitmq) ListenMessage() {
-
+func (rmq rabbitmq) ListenMessage(onMessage func(m amqp.Delivery)) {
 	err := rmq.ChanL.Qos(1, 0, false)
 	utils.HandleError(err, "Could not configure QoS")
 	messageChannel, err := rmq.ChanL.Consume(
@@ -80,38 +76,12 @@ func (rmq rabbitmq) ListenMessage() {
 		nil,
 	)
 	utils.HandleError(err, "Could not register consumer")
-
 	stopChan := make(chan bool)
-
 	go func() {
-		counter := 0
-		fmt.Printf("Consumer ready, PID: %d", os.Getpid())
 		for d := range messageChannel {
-			counter++
-			fmt.Printf("\nReceived a message: %s \n", d.Body)
-
-			pFIle := &utils.PickFile{}
-
-			err := json.Unmarshal(d.Body, pFIle)
-
-			if err != nil {
-				fmt.Printf("Error decoding JSON: %s", err)
-			}
-			if err := d.Ack(false); err != nil {
-				fmt.Printf("Error acknowledging message : %s", err)
-			} else {
-				outpath := pFIle.Path[:len(pFIle.Path)-3] + "dxf"
-				cmd := exec.Command("dwgread", pFIle.Path, "-O", "DXF", "-o", outpath)
-				out, err := cmd.CombinedOutput()
-				if err != nil {
-					fmt.Printf("cmd.Run() failed with %s\n", err)
-				}
-				fmt.Println(string(out))
-			}
-
+			onMessage(d)
 		}
 	}()
-
 	// Stop for program termination
 	<-stopChan
 
