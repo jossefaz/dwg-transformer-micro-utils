@@ -63,7 +63,7 @@ func (rmq rabbitmq) SendMessage(body []byte) {
 	}
 	fmt.Println(string(body))
 }
-func (rmq rabbitmq) ListenMessage(onMessage func(m amqp.Delivery)) {
+func (rmq rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, rmq rabbitmq)) {
 	err := rmq.ChanL.Qos(1, 0, false)
 	utils.HandleError(err, "Could not configure QoS")
 	messageChannel, err := rmq.ChanL.Consume(
@@ -79,7 +79,7 @@ func (rmq rabbitmq) ListenMessage(onMessage func(m amqp.Delivery)) {
 	stopChan := make(chan bool)
 	go func() {
 		for d := range messageChannel {
-			onMessage(d)
+			onMessage(d, rmq)
 		}
 	}()
 	// Stop for program termination
