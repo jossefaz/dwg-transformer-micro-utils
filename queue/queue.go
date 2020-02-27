@@ -100,7 +100,7 @@ func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq), q
 
 }
 
-func (rmq Rabbitmq) openListening (c []string, cb func(m amqp.Delivery, q Rabbitmq)) {
+func (rmq Rabbitmq) OpenListening (c []string, cb func(m amqp.Delivery, q Rabbitmq)) {
 	for _, q := range c {
 		rmq.ListenMessage(cb, q)
 	}
