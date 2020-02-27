@@ -8,6 +8,12 @@ type PickFile struct {
 	From string
 }
 
+type Result struct {
+	Success string
+	Fail    string
+	From    string
+}
+
 
 func SetResultMessage(pFile *PickFile, resultKeys []string, resultVal []int, from string, path string) []byte{
 	for i, k := range resultKeys {
