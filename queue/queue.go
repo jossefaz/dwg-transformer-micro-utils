@@ -96,3 +96,9 @@ func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq), q
 	<-stopChan
 
 }
+
+func openListening (c []string, conn Rabbitmq, cb func(m amqp.Delivery, q Rabbitmq)) {
+	for _, q := range c {
+		conn.ListenMessage(cb, q)
+	}
+}
