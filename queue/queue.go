@@ -7,12 +7,15 @@ import (
 	"github.com/yossefazoulay/go_utils/utils"
 )
 
+
+
 type queues map[string]amqp.Queue
 
 type Rabbitmq struct {
 	Conn  *amqp.Connection
 	ChanL *amqp.Channel
 	Queues queues
+
 }
 
 
@@ -97,8 +100,8 @@ func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq), q
 
 }
 
-func openListening (c []string, conn Rabbitmq, cb func(m amqp.Delivery, q Rabbitmq)) {
+func (rmq Rabbitmq) openListening (c []string, cb func(m amqp.Delivery, q Rabbitmq)) {
 	for _, q := range c {
-		conn.ListenMessage(cb, q)
+		rmq.ListenMessage(cb, q)
 	}
 }
