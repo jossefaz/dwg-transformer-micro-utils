@@ -9,7 +9,7 @@ type PickFile struct {
 }
 
 
-func SetResult(pFile *PickFile, resultKeys []string, resultVal []int, from string, path string) []byte{
+func SetResultMessage(pFile *PickFile, resultKeys []string, resultVal []int, from string, path string) []byte{
 	for i, k := range resultKeys {
 		pFile.Result[k] = resultVal[i]
 	}
