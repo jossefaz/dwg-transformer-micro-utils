@@ -5,11 +5,9 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type Logger struct {
-	Log *log.Logger
-}
 
-func InitLogs(logFile string, level string) Logger {
+
+func InitLogs(logFile string, level string) utils.Logger {
 	file := utils.OpenFile(logFile)
 	defer file.Close()
 	l := log.New()

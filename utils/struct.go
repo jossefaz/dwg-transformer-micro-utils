@@ -1,6 +1,9 @@
 package utils
 
-import "encoding/json"
+import (
+	"encoding/json"
+	log "github.com/sirupsen/logrus"
+)
 
 type PickFile struct {
 	Path string
@@ -14,14 +17,17 @@ type Result struct {
 	From    string
 }
 
+type Logger struct {
+	Log *log.Logger
+}
 
-func SetResultMessage(pFile *PickFile, resultKeys []string, resultVal []int, from string, path string) []byte{
+
+func SetResultMessage(pFile *PickFile, resultKeys []string, resultVal []int, from string, path string) ([]byte, error){
 	for i, k := range resultKeys {
 		pFile.Result[k] = resultVal[i]
 	}
 	pFile.From = from
 	pFile.Path = path
 	res, err := json.Marshal(pFile)
-	HandleError(err, "Cannot set result")
-	return res
+	return res, err
 }

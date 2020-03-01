@@ -1,10 +1,11 @@
 package utils
 
-import "fmt"
+import (
 
-func HandleError(err error, msg string) {
+)
+
+func HandleError(err error, msg string, logger Logger) {
 	if err != nil {
-		fmt.Printf("%s: %s", msg, err)
+		logger.Log.Error("%s: %s", msg, err)
 	}
-
 }
