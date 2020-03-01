@@ -3,8 +3,6 @@ package queue
 import (
 	"fmt"
 	"github.com/streadway/amqp"
-	"os"
-	"github.com/yossefazoulay/go_utils/utils"
 )
 
 
