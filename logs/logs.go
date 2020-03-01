@@ -5,15 +5,20 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type Logger struct {
+	Log *log.Logger
+}
 
-func InitLogs(logFile string, level string)  *log.Logger {
+func InitLogs(logFile string, level string) Logger {
 	file := utils.OpenFile(logFile)
 	defer file.Close()
 	l := log.New()
 	l.SetOutput(file)
 	l.SetFormatter(&log.JSONFormatter{})
 	setLogLevel(level, l)
-	return l
+	return Logger{
+		Log:l,
+	}
 }
 func setLogLevel(level string, l *log.Logger) {
 
