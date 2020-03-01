@@ -19,7 +19,7 @@ type Rabbitmq struct {
 }
 
 
-func NewRabbit(connString string, queuesName []string) (instance Rabbitmq, err error) {
+func NewRabbit(connString string, queuesName []string) (Rabbitmq, error) {
 	conn, err := dial(connString)
 	if err != nil {
 		return Rabbitmq{}, err
@@ -28,7 +28,10 @@ func NewRabbit(connString string, queuesName []string) (instance Rabbitmq, err e
 	if err != nil {
 		return Rabbitmq{}, err
 	}
-	qs := declareQueues(amqpChannel, queuesName)
+	qs, err := declareQueues(amqpChannel, queuesName)
+	if err != nil {
+		return Rabbitmq{}, err
+	}
 	return Rabbitmq{
 		Conn:  conn,
 		ChanL: amqpChannel,
@@ -36,12 +39,16 @@ func NewRabbit(connString string, queuesName []string) (instance Rabbitmq, err e
 	}, nil
 }
 
-func declareQueues(c *amqp.Channel, queuesName []string) queues{
+func declareQueues(c *amqp.Channel, queuesName []string) (queues, error){
 	qs := queues{}
 	for _, qu := range queuesName {
-		qs[qu] = connectToQueue(c, qu)
+		q, err := connectToQueue(c, qu)
+		if err != nil {
+			return qs, err
+		}
+		qs[qu] = q
 	}
-	return qs
+	return qs, nil
 }
 
 func dial(connString string) (*amqp.Connection, error) {
@@ -60,12 +67,12 @@ func getChannel(conn *amqp.Connection) (*amqp.Channel, error) {
 	return c, nil
 }
 
-func connectToQueue(c *amqp.Channel, queueName string) amqp.Queue {
+func connectToQueue(c *amqp.Channel, queueName string) (amqp.Queue, error) {
 	q, err := c.QueueDeclare(queueName, true, false, false, false, nil)
 	if err != nil {
-		os.Exit(1)
+		return q, err
 	}
-	return q
+	return q, nil
 }
 
 func (rmq Rabbitmq) SendMessage(body []byte, queueName string) {
