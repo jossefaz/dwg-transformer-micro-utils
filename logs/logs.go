@@ -14,7 +14,7 @@ func InitLogs(logFile string, level string) utils.Logger {
 	l.SetOutput(file)
 	l.SetFormatter(&log.JSONFormatter{})
 	setLogLevel(level, l)
-	return Logger{
+	return utils.Logger{
 		Log:l,
 	}
 }
