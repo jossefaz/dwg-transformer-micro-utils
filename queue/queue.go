@@ -19,15 +19,21 @@ type Rabbitmq struct {
 }
 
 
-func NewRabbit(connString string, queuesName []string) (instance Rabbitmq) {
-	conn := dial(connString)
-	amqpChannel := getChannel(conn)
+func NewRabbit(connString string, queuesName []string) (instance Rabbitmq, err error) {
+	conn, err := dial(connString)
+	if err != nil {
+		return Rabbitmq{}, err
+	}
+	amqpChannel, err := getChannel(conn)
+	if err != nil {
+		return Rabbitmq{}, err
+	}
 	qs := declareQueues(amqpChannel, queuesName)
 	return Rabbitmq{
 		Conn:  conn,
 		ChanL: amqpChannel,
 		Queues: qs,
-	}
+	}, nil
 }
 
 func declareQueues(c *amqp.Channel, queuesName []string) queues{
@@ -38,27 +44,24 @@ func declareQueues(c *amqp.Channel, queuesName []string) queues{
 	return qs
 }
 
-func dial(connString string) *amqp.Connection {
+func dial(connString string) (*amqp.Connection, error) {
 	conn, err := amqp.Dial(connString)
-	utils.HandleError(err, "Can't connect to AMQP")
 	if err != nil {
-		os.Exit(1)
+		return conn, err
 	}
-	return conn
+	return conn, nil
 }
 
-func getChannel(conn *amqp.Connection) *amqp.Channel {
+func getChannel(conn *amqp.Connection) (*amqp.Channel, error) {
 	c, err := conn.Channel()
-	utils.HandleError(err, "Can't create a amqpChannel")
 	if err != nil {
-		os.Exit(1)
+		return c, err
 	}
-	return c
+	return c, nil
 }
 
 func connectToQueue(c *amqp.Channel, queueName string) amqp.Queue {
 	q, err := c.QueueDeclare(queueName, true, false, false, false, nil)
-	utils.HandleError(err, "Could not declare `add` queue")
 	if err != nil {
 		os.Exit(1)
 	}
@@ -76,9 +79,11 @@ func (rmq Rabbitmq) SendMessage(body []byte, queueName string) {
 	}
 	fmt.Println(string(body))
 }
-func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq), queueName string) {
+func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq), queueName string) error {
 	err := rmq.ChanL.Qos(1, 0, false)
-	utils.HandleError(err, "Could not configure QoS")
+	if err != nil {
+		return err
+	}
 	messageChannel, err := rmq.ChanL.Consume(
 		rmq.Queues[queueName].Name,
 		"",
@@ -88,15 +93,19 @@ func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq), q
 		false,
 		nil,
 	)
-	utils.HandleError(err, "Could not register consumer")
+	if err != nil {
+		return err
+	}
 	stopChan := make(chan bool)
 	go func() {
 		for d := range messageChannel {
 			onMessage(d, rmq)
 		}
 	}()
+
 	// Stop for program termination
 	<-stopChan
+	return nil
 
 }
 
