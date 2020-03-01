@@ -2,9 +2,18 @@ package utils
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 )
+
+func OpenFile(fname string) *os.File {
+	file, err := os.OpenFile(fname, os.O_CREATE|os.O_APPEND, os.ModePerm)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return file
+}
 
 func ListFilesInDir(root string) []string {
 
