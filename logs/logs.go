@@ -3,16 +3,17 @@ package logs
 import (
 	"github.com/yossefazoulay/go_utils/utils"
 	log "github.com/sirupsen/logrus"
+	"io"
 	"os"
 )
 
 func InitLogs(logFile string, level string) (utils.Logger, error) {
-	var file, err = os.Create(logFile)
+	file, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return utils.Logger{}, err
 	}
 	l := log.New()
-	l.SetOutput(file)
+	l.SetOutput(io.MultiWriter(os.Stderr, file))
 	l.SetFormatter(&log.JSONFormatter{})
 	setLogLevel(level, l)
 	return utils.Logger{
