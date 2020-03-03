@@ -9,6 +9,7 @@ type PickFile struct {
 	Path string
 	Result map[string]int
 	From string
+	To string
 }
 
 type Result struct {
