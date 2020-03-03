@@ -1,7 +1,6 @@
 package queue
 
 import (
-	"fmt"
 	"github.com/streadway/amqp"
 )
 
@@ -73,16 +72,18 @@ func connectToQueue(c *amqp.Channel, queueName string) (amqp.Queue, error) {
 	return q, nil
 }
 
-func (rmq Rabbitmq) SendMessage(body []byte, queueName string) {
+func (rmq Rabbitmq) SendMessage(body []byte, queueName string) (string, error) {
 	err := rmq.ChanL.Publish("", rmq.Queues[queueName].Name, false, false, amqp.Publishing{
 		DeliveryMode: amqp.Persistent,
 		ContentType:  "text/plain",
 		Body:         body,
 	})
 	if err != nil {
-		fmt.Println(err)
+		return "error occured when sending message : ", err
+
 	}
-	fmt.Println(string(body))
+	return string(body), nil
+
 }
 func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq), queueName string) error {
 	err := rmq.ChanL.Qos(1, 0, false)
