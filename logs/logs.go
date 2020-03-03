@@ -6,10 +6,10 @@ import (
 	"os"
 )
 
-func InitLogs(logFile string, level string) utils.Logger {
+func InitLogs(logFile string, level string) (utils.Logger, error) {
 	var file, err = os.Create(logFile)
 	if err != nil {
-		panic(err)
+		return utils.Logger{}, err
 	}
 	l := log.New()
 	l.SetOutput(file)
@@ -17,7 +17,7 @@ func InitLogs(logFile string, level string) utils.Logger {
 	setLogLevel(level, l)
 	return utils.Logger{
 		Log:l,
-	}
+	}, nil
 }
 func setLogLevel(level string, l *log.Logger) {
 
