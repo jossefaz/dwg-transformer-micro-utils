@@ -20,6 +20,7 @@ type Crud struct {
 }
 
 type DbQuery struct {
+	dbType string
 	Schema string
 	Table string
 	CrudT Crud
