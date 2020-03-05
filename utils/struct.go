@@ -12,6 +12,20 @@ type PickFile struct {
 	To string
 }
 
+type Crud struct {
+	Create string
+	Retrieve string
+	Update string
+	Delete string
+}
+
+type DbQuery struct {
+	Schema string
+	Table string
+	CrudT Crud
+	ORMSQL string
+}
+
 type Result struct {
 	Success string
 	Fail    string
