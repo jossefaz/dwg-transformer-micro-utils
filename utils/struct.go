@@ -24,7 +24,8 @@ type DbQuery struct {
 	Schema string
 	Table string
 	CrudT Crud
-	ORMSQL string
+	Id []int
+	ORMKeyVal map[string]interface{}
 }
 
 type Result struct {
