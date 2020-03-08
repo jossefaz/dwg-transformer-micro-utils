@@ -101,11 +101,10 @@ func (rmq Rabbitmq) SendMessage(body []byte, queueName string, from string) (str
 	return string(body), nil
 
 }
-func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq, queueName string), queueName string) error {
-	err := rmq.ChanL.Qos(1, 0, false)
-	if err != nil {
-		return err
-	}
+func (rmq *Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q *Rabbitmq, queueName string), queueName string) error {
+
+	rmq.ChanL, _ = getChannel(rmq.Conn)
+
 	messageChannel, err := rmq.ChanL.Consume(
 		rmq.Queues[queueName].Name,
 		"",
@@ -131,7 +130,7 @@ func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq, qu
 
 }
 
-func (rmq Rabbitmq) OpenListening (c []string, cb func(m amqp.Delivery, q Rabbitmq, queueName string)) error {
+func (rmq *Rabbitmq) OpenListening (c []string, cb func(m amqp.Delivery, q *Rabbitmq, queueName string)) error {
 	stopChan := make(chan bool)
 	for _, q := range c {
 		go func() {
