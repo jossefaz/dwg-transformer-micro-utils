@@ -89,10 +89,10 @@ func (rmq Rabbitmq) SendMessage(body []byte, queueName string, from string) (str
 	return string(body), nil
 
 }
-func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq), queueName string) error {
+func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq), queueName string) (<-chan amqp.Delivery, error) {
 	err := rmq.ChanL.Qos(1, 0, false)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	messageChannel, err := rmq.ChanL.Consume(
 		rmq.Queues[queueName].Name,
@@ -104,27 +104,31 @@ func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq), q
 		nil,
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	stopChan := make(chan bool)
-	go func() {
-		for d := range messageChannel {
-			onMessage(d, rmq )
-		}
-	}()
-
 	// Stop for program termination
-	<-stopChan
-	return nil
+	return messageChannel, nil
 
 }
 
 func (rmq Rabbitmq) OpenListening (c []string, cb func(m amqp.Delivery, q Rabbitmq)) error {
+	stopChan := make(chan bool)
+	sChannel := []<-chan amqp.Delivery{}
 	for _, q := range c {
-		err := rmq.ListenMessage(cb, q)
+		mChan, err := rmq.ListenMessage(cb, q)
 		if err != nil {
 			return err
 		}
+		sChannel = append(sChannel, mChan)
 	}
+
+	go func() {
+		for _, mch := range sChannel {
+			for d := range mch {
+				cb(d, rmq)
+			}
+		}
+	}()
+	<-stopChan
 	return nil
 }
