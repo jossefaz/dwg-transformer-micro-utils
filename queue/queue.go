@@ -72,11 +72,15 @@ func connectToQueue(c *amqp.Channel, queueName string) (amqp.Queue, error) {
 	return q, nil
 }
 
-func (rmq Rabbitmq) SendMessage(body []byte, queueName string) (string, error) {
+func (rmq Rabbitmq) SendMessage(body []byte, queueName string, from string, to string) (string, error) {
 	err := rmq.ChanL.Publish("", rmq.Queues[queueName].Name, false, false, amqp.Publishing{
 		DeliveryMode: amqp.Persistent,
 		ContentType:  "text/plain",
 		Body:         body,
+		Headers: map[string]interface{}{
+			"From" : from,
+			"To" : to,
+		},
 	})
 	if err != nil {
 		return "error occured when sending message : ", err
@@ -85,7 +89,7 @@ func (rmq Rabbitmq) SendMessage(body []byte, queueName string) (string, error) {
 	return string(body), nil
 
 }
-func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq, queueName string), queueName string) error {
+func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq), queueName string) error {
 	err := rmq.ChanL.Qos(1, 0, false)
 	if err != nil {
 		return err
@@ -105,7 +109,7 @@ func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq, qu
 	stopChan := make(chan bool)
 	go func() {
 		for d := range messageChannel {
-			onMessage(d, rmq, queueName )
+			onMessage(d, rmq )
 		}
 	}()
 
@@ -115,7 +119,7 @@ func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq, qu
 
 }
 
-func (rmq Rabbitmq) OpenListening (c []string, cb func(m amqp.Delivery, q Rabbitmq, queueName string)) error {
+func (rmq Rabbitmq) OpenListening (c []string, cb func(m amqp.Delivery, q Rabbitmq)) error {
 	for _, q := range c {
 		err := rmq.ListenMessage(cb, q)
 		if err != nil {

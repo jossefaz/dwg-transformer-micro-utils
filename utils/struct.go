@@ -8,14 +8,7 @@ import (
 type PickFile struct {
 	Path string
 	Result map[string]int
-	From string
-	To string
 }
-
-
-
-
-
 
 type DbQuery struct {
 	dbType string
@@ -37,13 +30,11 @@ type Logger struct {
 }
 
 
-func SetResultMessage(pFile *PickFile, resultKeys []string, resultVal []int, from string, to string, path string) ([]byte, error){
+func SetResultMessage(pFile *PickFile, resultKeys []string, resultVal []int, path string) ([]byte, error){
 	for i, k := range resultKeys {
 		pFile.Result[k] = resultVal[i]
 	}
-	pFile.From = from
 	pFile.Path = path
-	pFile.To = to
 	res, err := json.Marshal(pFile)
 	return res, err
 }
