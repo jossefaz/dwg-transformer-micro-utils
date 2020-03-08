@@ -85,7 +85,7 @@ func (rmq Rabbitmq) SendMessage(body []byte, queueName string) (string, error) {
 	return string(body), nil
 
 }
-func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq), queueName string) error {
+func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq, queueName string), queueName string) error {
 	err := rmq.ChanL.Qos(1, 0, false)
 	if err != nil {
 		return err
@@ -115,8 +115,12 @@ func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq), q
 
 }
 
-func (rmq Rabbitmq) OpenListening (c []string, cb func(m amqp.Delivery, q Rabbitmq)) {
+func (rmq Rabbitmq) OpenListening (c []string, cb func(m amqp.Delivery, q Rabbitmq, queueName string)) error {
 	for _, q := range c {
-		rmq.ListenMessage(cb, q)
+		err := rmq.ListenMessage(cb, q)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
