@@ -1,6 +1,7 @@
 package queue
 
 import (
+	"fmt"
 	"github.com/streadway/amqp"
 )
 
@@ -21,13 +22,17 @@ func NewRabbit(connString string, queuesName []string) (Rabbitmq, error) {
 	if err != nil {
 		return Rabbitmq{}, err
 	}
-	amqpChannel, err := getChannel(conn)
-	if err != nil {
-		return Rabbitmq{}, err
+	amqpChannel, err1 := getChannel(conn)
+	if err1 != nil {
+		return Rabbitmq{}, err1
 	}
-	qs, err := declareQueues(amqpChannel, queuesName)
-	if err != nil {
-		return Rabbitmq{}, err
+	qs, err2 := declareQueues(amqpChannel, queuesName)
+	if err2 != nil {
+		return Rabbitmq{}, err2
+	}
+	err3 := sendOnlyIfAck(amqpChannel)
+	if err3 != nil {
+		return Rabbitmq{}, err3
 	}
 	return Rabbitmq{
 		Conn:  conn,
@@ -72,6 +77,13 @@ func connectToQueue(c *amqp.Channel, queueName string) (amqp.Queue, error) {
 	return q, nil
 }
 
+func sendOnlyIfAck(ch *amqp.Channel) error {
+	err := ch.Qos(1, 0, false)
+	if err != nil {
+		return err
+	}
+}
+
 func (rmq Rabbitmq) SendMessage(body []byte, queueName string, from string) (string, error) {
 	err := rmq.ChanL.Publish("", rmq.Queues[queueName].Name, false, false, amqp.Publishing{
 		DeliveryMode: amqp.Persistent,
@@ -89,10 +101,10 @@ func (rmq Rabbitmq) SendMessage(body []byte, queueName string, from string) (str
 	return string(body), nil
 
 }
-func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq), queueName string) (<-chan amqp.Delivery, error) {
+func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq, queueName string), queueName string) error {
 	err := rmq.ChanL.Qos(1, 0, false)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	messageChannel, err := rmq.ChanL.Consume(
 		rmq.Queues[queueName].Name,
@@ -104,31 +116,32 @@ func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq), q
 		nil,
 	)
 	if err != nil {
-		return nil, err
-	}
-	// Stop for program termination
-	return messageChannel, nil
-
-}
-
-func (rmq Rabbitmq) OpenListening (c []string, cb func(m amqp.Delivery, q Rabbitmq)) error {
-	stopChan := make(chan bool)
-	sChannel := []<-chan amqp.Delivery{}
-	for _, q := range c {
-		mChan, err := rmq.ListenMessage(cb, q)
-		if err != nil {
-			return err
-		}
-		sChannel = append(sChannel, mChan)
+		return err
 	}
 
 	go func() {
-		for _, mch := range sChannel {
-			for d := range mch {
-				cb(d, rmq)
-			}
+		for d := range messageChannel {
+			onMessage(d, rmq, queueName )
 		}
 	}()
+
+	// Stop for program termination
+
+	return nil
+
+}
+
+func (rmq Rabbitmq) OpenListening (c []string, cb func(m amqp.Delivery, q Rabbitmq, queueName string)) error {
+	stopChan := make(chan bool)
+	for _, q := range c {
+		go func() {
+			err := rmq.ListenMessage(cb, q)
+			if err != nil {
+				fmt.Println(err)
+				panic(err)
+			}
+		}()
+	}
 	<-stopChan
 	return nil
 }
