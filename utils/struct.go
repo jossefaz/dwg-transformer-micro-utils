@@ -12,18 +12,16 @@ type PickFile struct {
 	To string
 }
 
-type Crud struct {
-	Create string
-	Retrieve string
-	Update string
-	Delete string
-}
+
+
+
+
 
 type DbQuery struct {
 	dbType string
 	Schema string
 	Table string
-	CrudT Crud
+	CrudT string
 	Id []int
 	ORMKeyVal map[string]interface{}
 }
