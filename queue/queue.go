@@ -85,7 +85,7 @@ func (rmq Rabbitmq) SendMessage(body []byte, queueName string) (string, error) {
 	return string(body), nil
 
 }
-func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq), queueName string) error {
+func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq, cbname string), queueName string, cbname string) error {
 	err := rmq.ChanL.Qos(1, 0, false)
 	if err != nil {
 		return err
@@ -105,7 +105,7 @@ func (rmq Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q Rabbitmq), q
 	stopChan := make(chan bool)
 	go func() {
 		for d := range messageChannel {
-			onMessage(d, rmq)
+			onMessage(d, rmq, cbname )
 		}
 	}()
 
