@@ -12,7 +12,7 @@ type PickFile struct {
 }
 
 type DbQuery struct {
-	dbType string
+	DbType string
 	Schema string
 	Table string
 	CrudT string
