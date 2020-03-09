@@ -82,6 +82,7 @@ func sendOnlyIfAck(ch *amqp.Channel) error {
 	if err != nil {
 		return err
 	}
+	return nil
 }
 
 func (rmq Rabbitmq) SendMessage(body []byte, queueName string, from string) (string, error) {
