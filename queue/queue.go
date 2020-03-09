@@ -101,7 +101,7 @@ func (rmq Rabbitmq) SendMessage(body []byte, queueName string, from string) (str
 	return string(body), nil
 
 }
-func (rmq *Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q *Rabbitmq, queueName string), queueName string) error {
+func (rmq *Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q *Rabbitmq), queueName string) error {
 
 	rmq.ChanL, _ = getChannel(rmq.Conn)
 
@@ -120,7 +120,7 @@ func (rmq *Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q *Rabbitmq, 
 
 	go func() {
 		for d := range messageChannel {
-			onMessage(d, rmq, queueName )
+			onMessage(d, rmq)
 		}
 	}()
 
@@ -130,7 +130,7 @@ func (rmq *Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q *Rabbitmq, 
 
 }
 
-func (rmq *Rabbitmq) OpenListening (c []string, cb func(m amqp.Delivery, q *Rabbitmq, queueName string)) error {
+func (rmq *Rabbitmq) OpenListening (c []string, cb func(m amqp.Delivery, q *Rabbitmq)) error {
 	stopChan := make(chan bool)
 	for _, q := range c {
 		go func() {
