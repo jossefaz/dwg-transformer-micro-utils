@@ -17,24 +17,24 @@ type Rabbitmq struct {
 }
 
 
-func NewRabbit(connString string, queuesName []string) (Rabbitmq, error) {
+func NewRabbit(connString string, queuesName []string) (*Rabbitmq, error) {
 	conn, err := dial(connString)
 	if err != nil {
-		return Rabbitmq{}, err
+		return &Rabbitmq{}, err
 	}
 	amqpChannel, err1 := getChannel(conn)
 	if err1 != nil {
-		return Rabbitmq{}, err1
+		return &Rabbitmq{}, err1
 	}
 	qs, err2 := declareQueues(amqpChannel, queuesName)
 	if err2 != nil {
-		return Rabbitmq{}, err2
+		return &Rabbitmq{}, err2
 	}
 	err3 := sendOnlyIfAck(amqpChannel)
 	if err3 != nil {
-		return Rabbitmq{}, err3
+		return &Rabbitmq{}, err3
 	}
-	return Rabbitmq{
+	return &Rabbitmq{
 		Conn:  conn,
 		ChanL: amqpChannel,
 		Queues: qs,
@@ -85,7 +85,7 @@ func sendOnlyIfAck(ch *amqp.Channel) error {
 	return nil
 }
 
-func (rmq Rabbitmq) SendMessage(body []byte, queueName string, from string) (string, error) {
+func (rmq *Rabbitmq) SendMessage(body []byte, queueName string, from string) (string, error) {
 	err := rmq.ChanL.Publish("", rmq.Queues[queueName].Name, false, false, amqp.Publishing{
 		DeliveryMode: amqp.Persistent,
 		ContentType:  "text/plain",
