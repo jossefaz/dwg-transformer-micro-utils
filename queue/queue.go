@@ -134,13 +134,11 @@ func (rmq *Rabbitmq) ListenMessage(onMessage func(m amqp.Delivery, q *Rabbitmq),
 func (rmq *Rabbitmq) OpenListening (c []string, cb func(m amqp.Delivery, q *Rabbitmq)) error {
 	stopChan := make(chan bool)
 	for _, q := range c {
-		go func() {
 			err := rmq.ListenMessage(cb, q)
 			if err != nil {
 				fmt.Println(err)
 				panic(err)
 			}
-		}()
 	}
 	<-stopChan
 	return nil
