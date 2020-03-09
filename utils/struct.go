@@ -6,6 +6,7 @@ import (
 )
 
 type PickFile struct {
+	Id int
 	Path string
 	Result map[string]int
 }
