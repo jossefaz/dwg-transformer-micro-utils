@@ -25,7 +25,7 @@ func Btoi(b bool) int {
 	return 0
 }
 
-func getEnv(envKey string) (string, error) {
+func GetEnv(envKey string) (string, error) {
 	val, ok := os.LookupEnv(envKey)
 	if !ok {
 		return "", errors.New(fmt.Sprintf("%s not set\n", envKey))
