@@ -85,15 +85,12 @@ func sendOnlyIfAck(ch *amqp.Channel) error {
 	return nil
 }
 
-func (rmq *Rabbitmq) SendMessage(body []byte, queueName string, from string) (string, error) {
+func (rmq *Rabbitmq) SendMessage(body []byte, queueName string, headers map[string]interface{}) (string, error) {
 	err := rmq.ChanL.Publish("", rmq.Queues[queueName].Name, false, false, amqp.Publishing{
 		DeliveryMode: amqp.Persistent,
 		ContentType:  "text/plain",
 		Body:         body,
-		Headers: map[string]interface{}{
-			"From" : from,
-			"To" : queueName,
-		},
+		Headers: headers,
 	})
 	if err != nil {
 		return "error occured when sending message : ", err
