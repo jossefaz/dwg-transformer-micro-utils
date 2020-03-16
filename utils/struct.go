@@ -9,6 +9,7 @@ type PickFile struct {
 	Id int
 	Path string
 	Result map[string]int
+	Status int
 }
 
 type DbQuery struct {
