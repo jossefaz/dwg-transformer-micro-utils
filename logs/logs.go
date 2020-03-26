@@ -1,8 +1,8 @@
 package logs
 
 import (
-	"github.com/yossefazoulay/go_utils/utils"
 	log "github.com/sirupsen/logrus"
+	"github.com/yossefaz/go_utils/utils"
 	"io"
 	"os"
 )
@@ -17,13 +17,13 @@ func InitLogs(logFile string, level string) (utils.Logger, error) {
 	l.SetFormatter(&log.JSONFormatter{})
 	setLogLevel(level, l)
 	return utils.Logger{
-		Log:l,
+		Log: l,
 	}, nil
 }
 func setLogLevel(level string, l *log.Logger) {
 
 	switch level {
-	case "DEBUG" :
+	case "DEBUG":
 		l.SetLevel(log.DebugLevel)
 	case "INFO":
 		l.SetLevel(log.InfoLevel)

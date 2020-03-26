@@ -1,4 +1,4 @@
-module github.com/yossefazoulay/go_utils
+module github.com/yossefaz/go_utils
 
 go 1.13
 
