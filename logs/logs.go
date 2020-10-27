@@ -2,7 +2,7 @@ package logs
 
 import (
 	log "github.com/sirupsen/logrus"
-	"github.com/yossefaz/go_utils/utils"
+	"github.com/yossefaz/dwg-transformer-micro-utils/utils"
 	"io"
 	"os"
 )
