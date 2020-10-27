@@ -1,4 +1,4 @@
-module github.com/yossefaz/go_utils
+module github.com/yossefaz/dwg-transformer-micro-utils
 
 go 1.13
 
